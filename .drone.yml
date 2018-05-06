@@ -1,0 +1,14 @@
+pipeline:
+  build:
+    image: node:6.4.0
+    commands:
+      - npm install
+      - npm run build
+
+  npm:
+    image: plugins/npm
+    secrets: [ npm_password ]
+    username: sulliwane
+    email: sulliwane@gmail.com
+    when:
+      event: tag
