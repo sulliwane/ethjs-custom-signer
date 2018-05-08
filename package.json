@@ -1,10 +1,11 @@
 {
   "name": "ethjs-custom-signer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "custome ethjs signer",
-  "main": "src/ethjs-custom-signer.js",
+  "main": "dist/ethjs-custom-signer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/babel src --out-dir dist --copy-files"
   },
   "author": "",
   "license": "ISC",
