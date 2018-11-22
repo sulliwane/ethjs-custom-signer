@@ -115,6 +115,17 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
         jsonrpc: payload.jsonrpc,
         result: signedData,
       });
+    } else if (payload.method === 'eth_signTypedData_v3') {
+      const signedData = await self.options.signTypedDatav3(
+        payload.params[0],
+        payload.params[1],
+      );
+      debug('signedData', signedData);
+      callback(null, {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result: signedData,
+      });
     } else if (payload.method === 'eth_sign') {
       const signedData = await self.options.signMessage(payload.params[0]);
       callback(null, signedData);
