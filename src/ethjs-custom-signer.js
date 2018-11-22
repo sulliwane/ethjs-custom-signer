@@ -13,13 +13,19 @@ const debug = Debug('ethjs-iexec-signer');
  */
 function SignerProvider(path, options) {
   if (!(this instanceof SignerProvider)) {
-    throw new Error('[ethjs-provider-signer] the SignerProvider instance requires the "new" flag in order to function normally (e.g. `const eth = new Eth(new SignerProvider(...));`).');
+    throw new Error(
+      '[ethjs-provider-signer] the SignerProvider instance requires the "new" flag in order to function normally (e.g. `const eth = new Eth(new SignerProvider(...));`).',
+    );
   }
   if (typeof options !== 'object') {
-    throw new Error(`[ethjs-provider-signer] the SignerProvider requires an options object be provided with the 'privateKey' property specified, you provided type ${typeof options}.`);
+    throw new Error(
+      `[ethjs-provider-signer] the SignerProvider requires an options object be provided with the 'privateKey' property specified, you provided type ${typeof options}.`,
+    );
   }
   if (typeof options.signTransaction !== 'function') {
-    throw new Error(`[ethjs-provider-signer] the SignerProvider requires an options object be provided with the 'signTransaction' property specified, you provided type ${typeof options.privateKey} (e.g. 'const eth = new Eth(new SignerProvider("http://ropsten.infura.io", { privateKey: (account, cb) => cb(null, 'some private key') }));').`);
+    throw new Error(
+      `[ethjs-provider-signer] the SignerProvider requires an options object be provided with the 'signTransaction' property specified, you provided type ${typeof options.privateKey} (e.g. 'const eth = new Eth(new SignerProvider("http://ropsten.infura.io", { privateKey: (account, cb) => cb(null, 'some private key') }));').`,
+    );
   }
 
   const self = this;
@@ -113,7 +119,9 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
       const signedData = await self.options.signMessage(payload.params[0]);
       callback(null, signedData);
     } else if (payload.method === 'personal_sign') {
-      const signedData = await self.options.signPersonalMessage(payload.params[0]);
+      const signedData = await self.options.signPersonalMessage(
+        payload.params[0],
+      );
       callback(null, signedData);
     }
     return self.provider.sendAsync(payload, callback);
