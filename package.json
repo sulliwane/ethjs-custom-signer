@@ -1,6 +1,6 @@
 {
   "name": "ethjs-custom-signer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "custome ethjs signer",
   "main": "dist/ethjs-custom-signer.js",
   "scripts": {
