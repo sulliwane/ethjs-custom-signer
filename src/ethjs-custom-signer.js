@@ -120,7 +120,6 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
         payload.params[0],
         payload.params[1],
       );
-      debug('signedData', signedData);
       callback(null, {
         id: payload.id,
         jsonrpc: payload.jsonrpc,
