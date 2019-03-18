@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "debug": "4.1.0",
+    "debug": "4.1.1",
     "ethjs-provider-http": "^0.1.6",
     "ethjs-rpc": "^0.2.0"
   },
@@ -18,10 +18,10 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
-    "eslint": "5.9.0",
+    "eslint": "5.15.1",
     "eslint-config-airbnb-base": "13.1.0",
-    "eslint-plugin-import": "2.14.0",
-    "prettier": "1.15.2",
+    "eslint-plugin-import": "2.16.0",
+    "prettier": "1.16.4",
     "prettier-eslint": "^8.8.1"
   },
   "babel": {

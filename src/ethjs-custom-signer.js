@@ -120,18 +120,21 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
         payload.params[0],
         payload.params[1],
       );
-      debug('signedData', signedData);
       callback(null, {
         id: payload.id,
         jsonrpc: payload.jsonrpc,
         result: signedData,
       });
     } else if (payload.method === 'eth_sign') {
-      const signedData = await self.options.signMessage(payload.params[0]);
+      const signedData = await self.options.signMessage(
+        payload.params[0],
+        payload.params[1],
+      );
       callback(null, signedData);
     } else if (payload.method === 'personal_sign') {
       const signedData = await self.options.signPersonalMessage(
         payload.params[0],
+        payload.params[1],
       );
       callback(null, signedData);
     }
