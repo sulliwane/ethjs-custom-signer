@@ -81,13 +81,15 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
         }),
       ]);
       debug('nonce', nonce);
-      debug('gasPrice', gasPrice);
+      debug('eth_gasPrice', gasPrice);
+      const useGasPrice = self.options.gasPrice || gasPrice;
+      debug('useGasPrice', useGasPrice);
       debug('estimateGas', estimateGas);
 
       const rawTxPayload = Object.assign(
         {
           nonce,
-          gasPrice,
+          gasPrice: useGasPrice,
           gasLimit: estimateGas,
         },
         payload.params[0],
