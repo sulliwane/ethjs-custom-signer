@@ -2,6 +2,10 @@
 
 ## Changelog:
 
+### v1.1.1:
+
+- add gasPrice option to overwrite eth_gasPrice estimation
+
 ### v1.1.0: breaking changes
 
 - signMessage interface is now signMessage(address, data)
