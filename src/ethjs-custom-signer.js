@@ -58,7 +58,7 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
     if (payload.method === 'eth_accounts' && self.options.accounts) {
       const accounts = await self.options.accounts();
       // create new output payload
-      const inputPayload = Object.assign(
+      const outputPayload = Object.assign(
         {},
         {
           id: payload.id,
@@ -66,30 +66,49 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
           result: accounts,
         },
       );
-
-      callback(null, inputPayload);
+      callback(null, outputPayload);
+    } else if (payload.method === 'eth_gasPrice' && self.options.gasPrice) {
+      debug(`eth_gasPrice overwrite ${self.options.gasPrice}`);
+      const outputPayload = Object.assign(
+        {},
+        {
+          id: payload.id,
+          jsonrpc: payload.jsonrpc,
+          result: self.options.gasPrice,
+        },
+      );
+      callback(null, outputPayload);
     } else if (payload.method === 'eth_sendTransaction') {
       const [nonce, gasPrice, estimateGas] = await Promise.all([
         self.rpc.sendAsync({
           method: 'eth_getTransactionCount',
           params: [payload.params[0].from, 'latest'],
         }),
-        self.rpc.sendAsync({ method: 'eth_gasPrice' }),
+        new Promise((resolve, reject) => self.sendAsync(
+          {
+            id: payload.id + 1,
+            jsonrpc: payload.jsonrpc,
+            method: 'eth_gasPrice',
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else if (result.error) reject(result.error);
+            else resolve(result.result);
+          },
+        )),
         self.rpc.sendAsync({
           method: 'eth_estimateGas',
           params: [payload.params[0]],
         }),
       ]);
       debug('nonce', nonce);
-      debug('eth_gasPrice', gasPrice);
-      const useGasPrice = self.options.gasPrice || gasPrice;
-      debug('useGasPrice', useGasPrice);
       debug('estimateGas', estimateGas);
+      debug('gasPrice', gasPrice);
 
       const rawTxPayload = Object.assign(
         {
           nonce,
-          gasPrice: useGasPrice,
+          gasPrice,
           gasLimit: estimateGas,
         },
         payload.params[0],
@@ -109,7 +128,7 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
       );
 
       // send payload
-      return self.provider.sendAsync(outputPayload, callback);
+      self.provider.sendAsync(outputPayload, callback);
     } else if (payload.method === 'eth_signTypedData') {
       const signedData = await self.options.signTypedData(payload.params[0]);
       callback(null, {
@@ -139,11 +158,12 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
         payload.params[1],
       );
       callback(null, signedData);
+    } else {
+      self.provider.sendAsync(payload, callback);
     }
-    return self.provider.sendAsync(payload, callback);
   } catch (error) {
     debug('sendAsync()', error);
-    return callback(error, null);
+    callback(error, null);
   }
 };
 

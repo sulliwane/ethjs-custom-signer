@@ -1,10 +1,14 @@
 # ethjs-custom-signer
 
-## Changelog:
+## Changelog:
+
+### unreleased:
+
+- overwrite `eth_gasPrice` not only for transactions
 
 ### v1.1.1:
 
-- add gasPrice option to overwrite eth_gasPrice estimation
+- add gasPrice option to overwrite `eth_gasPrice` estimation
 
 ### v1.1.0: breaking changes
 
