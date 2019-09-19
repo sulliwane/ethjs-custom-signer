@@ -132,13 +132,21 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
         payload.params[0],
         payload.params[1],
       );
-      callback(null, signedData);
+      callback(null, {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result: signedData,
+      });
     } else if (payload.method === 'personal_sign') {
       const signedData = await self.options.signPersonalMessage(
         payload.params[0],
         payload.params[1],
       );
-      callback(null, signedData);
+      callback(null, {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result: signedData,
+      });
     }
     return self.provider.sendAsync(payload, callback);
   } catch (error) {
