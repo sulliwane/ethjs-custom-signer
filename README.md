@@ -5,6 +5,8 @@
 ### unreleased:
 
 - overwrite `eth_gasPrice` not only for transactions
+- fix `eth_sign` callback(error, result) now follows the RPC Result specification `Result: { id, jsonrpc, result }`
+- fix `personal_sign` callback(error, result) now follows the RPC Result specification `Result: { id, jsonrpc, result }`
 
 ### v1.1.1:
 
