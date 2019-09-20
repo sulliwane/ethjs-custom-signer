@@ -1,15 +1,16 @@
 # ethjs-custom-signer
 
-## Changelog:
+## Changelog:
 
 ### unreleased:
 
+- overwrite `eth_gasPrice` not only for transactions
 - fix `eth_sign` callback(error, result) now follows the RPC Result specification `Result: { id, jsonrpc, result }`
 - fix `personal_sign` callback(error, result) now follows the RPC Result specification `Result: { id, jsonrpc, result }`
 
 ### v1.1.1:
 
-- add gasPrice option to overwrite eth_gasPrice estimation
+- add gasPrice option to overwrite `eth_gasPrice` estimation
 
 ### v1.1.0: breaking changes
 
