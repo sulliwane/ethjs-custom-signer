@@ -2,7 +2,7 @@
 
 ## Changelog:
 
-### unreleased:
+### v1.2.0: breaking changes
 
 - overwrite `eth_gasPrice` not only for transactions
 - fix `eth_sign` callback(error, result) now follows the RPC Result specification `Result: { id, jsonrpc, result }`
