@@ -137,7 +137,7 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
       const outputPayload = {
         id: payload.id,
         jsonrpc: payload.jsonrpc,
-        result: await self.options.getTransactionCount(payload.params),
+        result: await self.options.getTransactionCount(...payload.params),
       };
       callback(null, outputPayload);
     } else if (payload.method === 'eth_gasPrice' && self.options.gasPrice) {
