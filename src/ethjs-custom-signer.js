@@ -64,12 +64,9 @@ function SignerProvider(path, options) {
       ));
       debug('nonce', nonce);
 
-      const txToSign = Object.assign(
-        {
-          nonce,
-        },
-        payload.params[0],
-      );
+      const txToSign = Object.assign({}, payload.params[0], {
+        nonce,
+      });
       debug('txToSign', txToSign);
 
       const signedRawTx = await self.options.signTransaction(txToSign);
