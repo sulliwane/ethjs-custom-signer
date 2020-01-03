@@ -2,6 +2,11 @@
 
 ## Changelog:
 
+### unreleased
+
+- add `getTransactionCount(address, block)` option to override `eth_getTransactionCount`. Allow custom nonce management.
+- `eth_sendTransaction` now pushes transactions into a queue and sends them sequentially.
+
 ### v1.2.0: breaking changes
 
 - overwrite `eth_gasPrice` not only for transactions
@@ -10,7 +15,7 @@
 
 ### v1.1.1:
 
-- add gasPrice option to overwrite `eth_gasPrice` estimation
+- add `gasPrice` option to override `eth_gasPrice` estimation
 
 ### v1.1.0: breaking changes
 

@@ -1,3 +1,5 @@
+require('core-js/stable');
+require('regenerator-runtime/runtime');
 const Debug = require('debug');
 const HTTPProvider = require('ethjs-provider-http');
 const EthRPC = require('ethjs-rpc');
@@ -29,6 +31,62 @@ function SignerProvider(path, options) {
   }
 
   const self = this;
+
+  const txQueue = [];
+  let processingTxQueue = false;
+  const processQueue = async () => {
+    if (processingTxQueue) {
+      debug('already processing txQueue');
+      return;
+    }
+    processingTxQueue = true;
+    const tx = txQueue.shift();
+    if (!tx) {
+      debug('txQueue is empty');
+      processingTxQueue = false;
+      return;
+    }
+    debug('processing 1 tx remaining', txQueue.length);
+    const { payload, callback } = tx;
+    try {
+      const nonce = await new Promise((resolve, reject) => self.sendAsync(
+        {
+          id: payload.id + 1,
+          jsonrpc: payload.jsonrpc,
+          method: 'eth_getTransactionCount',
+          params: [payload.params[0].from, 'pending'],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else if (result.error) reject(result.error);
+          else resolve(result.result);
+        },
+      ));
+      debug('nonce', nonce);
+
+      const txToSign = Object.assign({}, payload.params[0], {
+        nonce,
+      });
+      debug('txToSign', txToSign);
+
+      const signedRawTx = await self.options.signTransaction(txToSign);
+
+      const outputPayload = {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        method: 'eth_sendRawTransaction',
+        params: [signedRawTx],
+      };
+      await new Promise((resolve) => {
+        self.provider.sendAsync(outputPayload, (error, result) => resolve(callback(error, result)));
+      });
+    } catch (e) {
+      callback(e);
+    }
+    processingTxQueue = false;
+    processQueue();
+  };
+
   self.options = Object.assign(
     {
       provider: HTTPProvider,
@@ -38,6 +96,10 @@ function SignerProvider(path, options) {
   self.timeout = options.timeout || 0;
   self.provider = new self.options.provider(path, self.timeout); // eslint-disable-line
   self.rpc = new EthRPC(self.provider);
+  self.addTxToQueue = (tx) => {
+    txQueue.push(tx);
+    processQueue();
+  };
 }
 
 /**
@@ -58,32 +120,33 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
     if (payload.method === 'eth_accounts' && self.options.accounts) {
       const accounts = await self.options.accounts();
       // create new output payload
-      const outputPayload = Object.assign(
-        {},
-        {
-          id: payload.id,
-          jsonrpc: payload.jsonrpc,
-          result: accounts,
-        },
-      );
+      const outputPayload = {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result: accounts,
+      };
+      callback(null, outputPayload);
+    } else if (
+      payload.method === 'eth_getTransactionCount'
+      && self.options.getTransactionCount
+    ) {
+      debug('eth_getTransactionCount overwrite getTransactionCount');
+      const outputPayload = {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result: await self.options.getTransactionCount(...payload.params),
+      };
       callback(null, outputPayload);
     } else if (payload.method === 'eth_gasPrice' && self.options.gasPrice) {
       debug(`eth_gasPrice overwrite ${self.options.gasPrice}`);
-      const outputPayload = Object.assign(
-        {},
-        {
-          id: payload.id,
-          jsonrpc: payload.jsonrpc,
-          result: self.options.gasPrice,
-        },
-      );
+      const outputPayload = {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result: self.options.gasPrice,
+      };
       callback(null, outputPayload);
     } else if (payload.method === 'eth_sendTransaction') {
-      const [nonce, gasPrice, estimateGas] = await Promise.all([
-        self.rpc.sendAsync({
-          method: 'eth_getTransactionCount',
-          params: [payload.params[0].from, 'latest'],
-        }),
+      const [gasPrice, estimateGas] = await Promise.all([
         new Promise((resolve, reject) => self.sendAsync(
           {
             id: payload.id + 1,
@@ -101,34 +164,24 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
           params: [payload.params[0]],
         }),
       ]);
-      debug('nonce', nonce);
       debug('estimateGas', estimateGas);
       debug('gasPrice', gasPrice);
 
-      const rawTxPayload = Object.assign(
-        {
-          nonce,
-          gasPrice,
-          gasLimit: estimateGas,
-        },
-        payload.params[0],
-      );
-      debug('rawTxPayload', rawTxPayload);
-
-      const signedHexPayload = await self.options.signTransaction(rawTxPayload);
-
-      const outputPayload = Object.assign(
-        {},
-        {
-          id: payload.id,
-          jsonrpc: payload.jsonrpc,
-          method: 'eth_sendRawTransaction',
-          params: [signedHexPayload],
-        },
-      );
-
-      // send payload
-      self.provider.sendAsync(outputPayload, callback);
+      const rawTxPayload = Object.assign({
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        params: [
+          Object.assign(
+            {
+              gasPrice,
+              gasLimit: estimateGas,
+            },
+            payload.params[0],
+          ),
+        ],
+      });
+      // add to tx queue
+      self.addTxToQueue({ payload: rawTxPayload, callback });
     } else if (payload.method === 'eth_signTypedData') {
       const signedData = await self.options.signTypedData(payload.params[0]);
       callback(null, {
