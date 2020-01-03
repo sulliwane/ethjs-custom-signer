@@ -67,26 +67,33 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
         },
       );
       callback(null, outputPayload);
-    } else if (payload.method === 'eth_gasPrice' && self.options.gasPrice) {
-      debug(`eth_gasPrice overwrite ${self.options.gasPrice}`);
+    } else if (
+      payload.method === 'eth_getTransactionCount'
+      && self.options.getTransactionCount
+    ) {
+      debug('eth_getTransactionCount overwrite getTransactionCount');
       const outputPayload = Object.assign(
         {},
         {
           id: payload.id,
           jsonrpc: payload.jsonrpc,
-          result: self.options.gasPrice,
+          result: await self.options.getTransactionCount(payload.params),
         },
       );
       callback(null, outputPayload);
+    } else if (payload.method === 'eth_gasPrice' && self.options.gasPrice) {
+      debug(`eth_gasPrice overwrite ${self.options.gasPrice}`);
+      const outputPayload = {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result: self.options.gasPrice,
+      };
+      callback(null, outputPayload);
     } else if (payload.method === 'eth_sendTransaction') {
-      const [nonce, gasPrice, estimateGas] = await Promise.all([
-        self.rpc.sendAsync({
-          method: 'eth_getTransactionCount',
-          params: [payload.params[0].from, 'latest'],
-        }),
+      const [gasPrice, estimateGas] = await Promise.all([
         new Promise((resolve, reject) => self.sendAsync(
           {
-            id: payload.id + 1,
+            id: payload.id + 2,
             jsonrpc: payload.jsonrpc,
             method: 'eth_gasPrice',
           },
@@ -101,9 +108,23 @@ SignerProvider.prototype.sendAsync = async function sendAsync(
           params: [payload.params[0]],
         }),
       ]);
-      debug('nonce', nonce);
       debug('estimateGas', estimateGas);
       debug('gasPrice', gasPrice);
+
+      const nonce = await new Promise((resolve, reject) => self.sendAsync(
+        {
+          id: payload.id + 1,
+          jsonrpc: payload.jsonrpc,
+          method: 'eth_getTransactionCount',
+          params: [payload.params[0].from, 'latest'],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else if (result.error) reject(result.error);
+          else resolve(result.result);
+        },
+      ));
+      debug('nonce', nonce);
 
       const rawTxPayload = Object.assign(
         {
