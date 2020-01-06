@@ -2,7 +2,7 @@
 
 ## Changelog:
 
-### unreleased
+### v1.3.0:
 
 - add `getTransactionCount(address, block)` option to override `eth_getTransactionCount`. Allow custom nonce management.
 - `eth_sendTransaction` now pushes transactions into a queue and sends them sequentially.
