@@ -1,5 +1,3 @@
-require('core-js/stable');
-require('regenerator-runtime/runtime');
 const Debug = require('debug');
 const HTTPProvider = require('ethjs-provider-http');
 const EthRPC = require('ethjs-rpc');

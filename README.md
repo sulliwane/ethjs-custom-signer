@@ -2,6 +2,10 @@
 
 ## Changelog:
 
+### v1.4.0: breaking changes
+
+- dropping support for old browsers
+
 ### v1.3.0:
 
 - add `getTransactionCount(address, block)` option to override `eth_getTransactionCount`. Allow custom nonce management.

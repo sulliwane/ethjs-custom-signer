@@ -10,11 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "core-js": "3.6.1",
     "debug": "4.1.1",
     "ethjs-provider-http": "0.1.6",
-    "ethjs-rpc": "0.2.0",
-    "regenerator-runtime": "0.13.3"
+    "ethjs-rpc": "0.2.0"
   },
   "devDependencies": {
     "@babel/cli": "7.7.7",
@@ -32,7 +30,11 @@
         "@babel/env",
         {
           "targets": {
-            "firefox": "21"
+            "node": "10.12.0",
+            "browsers": [
+              "defaults",
+              "not IE 11"
+            ]
           }
         }
       ]
