@@ -1,13 +1,13 @@
 pipeline:
   build:
-    image: node:6.4.0
+    image: node:10
     commands:
       - npm install
       - npm run build
 
   npm:
     image: plugins/npm
-    secrets: [ npm_password ]
+    secrets: [npm_password]
     username: sulliwane
     email: sulliwane@gmail.com
     when:
