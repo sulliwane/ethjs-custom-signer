@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "ethjs-provider-http": "0.1.6",
     "ethjs-rpc": "0.2.0"
   },
